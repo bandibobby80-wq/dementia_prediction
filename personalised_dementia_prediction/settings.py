@@ -25,7 +25,9 @@ SECRET_KEY = 'django-insecure-(tp(s-4_^m94&h_y)r6(st_!vrp_60qgki5dte@!66c3)0o2zy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+CSRF_TRUSTED_ORIGINS = ['https://personalized-dementia-prediction.onrender.com', 'https://*.onrender.com']
 
 
 # Application definition
