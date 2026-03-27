@@ -40,6 +40,7 @@ urlpatterns = [
     path('api/predict/',        api_views.predict_api,    name='api_predict'),
     path('api/login/',          api_views.login_api,      name='api_login'),
     path('api/register/',       api_views.register_api,   name='api_register'),
+    path('api/history/<int:user_id>/', api_views.history_api, name='api_history'),
 
     # ── User views ──
     path('UserHome/',           usr.UserHome,             name='UserHome'),

@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.conf import settings
-from .models import UserRegistrationModel
+from .models import UserRegistrationModel, PredictionRecord
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -59,6 +59,32 @@ def predict_api(request):
             
         risk_level = 'high' if prediction == 'Demented' else 'low'
         
+        # ── Save to DB if user_id provided ──
+        user_id = data.get('user_id')
+        if user_id:
+            try:
+                user_obj = UserRegistrationModel.objects.get(id=user_id)
+                PredictionRecord.objects.create(
+                    user=user_obj,
+                    age=float(data.get('Age', 0)),
+                    gender=data.get('M_F', 'M'),
+                    educ=float(data.get('EDUC', 0)),
+                    ses=float(data.get('SES', 0)),
+                    mmse=float(data.get('MMSE', 0)),
+                    cdr=float(data.get('CDR', 0)),
+                    etiv=float(data.get('eTIV', 0)),
+                    nwbv=float(data.get('nWBV', 0)),
+                    asf=float(data.get('ASF', 0)),
+                    visit=int(data.get('Visit', 1)),
+                    mr_delay=int(data.get('MR_Delay', 0)),
+                    result=prediction,
+                    confidence=confidence,
+                    risk_level=risk_level,
+                )
+            except Exception as db_err:
+                # Log but don't fail the prediction if DB save fails
+                print(f"Failed to save prediction: {db_err}")
+
         return Response({
             'prediction': prediction,
             'confidence': confidence,
@@ -106,5 +132,25 @@ def register_api(request):
             role='user'
         )
         return Response({'message': 'Registration successful! Wait for admin activation.'})
+    except Exception as e:
+        return Response({'error': str(e)}, status=400)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def history_api(request, user_id):
+    try:
+        records = PredictionRecord.objects.filter(user_id=user_id).order_by('-timestamp')
+        data = []
+        for r in records:
+            data.append({
+                'id': r.id,
+                'timestamp': r.timestamp.strftime('%Y-%M-%d %H:%M'),
+                'result': r.result,
+                'confidence': r.confidence,
+                'risk_level': r.risk_level,
+                'age': r.age,
+                'mmse': r.mmse
+            })
+        return Response({'history': data})
     except Exception as e:
         return Response({'error': str(e)}, status=400)
