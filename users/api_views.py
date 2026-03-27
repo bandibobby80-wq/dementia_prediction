@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.conf import settings
+from .models import UserRegistrationModel
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -63,5 +64,47 @@ def predict_api(request):
             'confidence': confidence,
             'risk_level': risk_level
         })
+    except Exception as e:
+        return Response({'error': str(e)}, status=400)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login_api(request):
+    loginid = request.data.get('loginid')
+    password = request.data.get('password')
+    
+    try:
+        user = UserRegistrationModel.objects.get(loginid=loginid, password=password)
+        if user.status != 'activated':
+            return Response({'error': 'Account not activated by admin yet.'}, status=403)
+            
+        return Response({
+            'id': user.id,
+            'name': user.name,
+            'loginid': user.loginid,
+            'role': user.role
+        })
+    except UserRegistrationModel.DoesNotExist:
+        return Response({'error': 'Invalid Login ID or Password'}, status=401)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def register_api(request):
+    data = request.data
+    try:
+        user = UserRegistrationModel.objects.create(
+            name=data.get('name'),
+            loginid=data.get('loginid'),
+            password=data.get('password'),
+            mobile=data.get('mobile'),
+            email=data.get('email'),
+            locality=data.get('locality', ''),
+            address=data.get('address', ''),
+            city=data.get('city', ''),
+            state=data.get('state', ''),
+            status='waiting', # New mobile users wait for activation
+            role='user'
+        )
+        return Response({'message': 'Registration successful! Wait for admin activation.'})
     except Exception as e:
         return Response({'error': str(e)}, status=400)
