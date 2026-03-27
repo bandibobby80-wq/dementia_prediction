@@ -1,0 +1,129 @@
+{% extends 'admins/adminbase.html' %}
+{% block title %}Activity Log | DementiaAI Admin{% endblock %}
+
+{% block contents %}
+<section style="background:linear-gradient(135deg,#1e1b4b,#0f172a);padding:2.5rem 0 2rem;border-bottom:1px solid rgba(167,139,250,.1);">
+  <div class="container">
+    <h2 style="font-weight:800;color:#fff;margin:0;"><i class="fa-solid fa-clock-rotate-left me-2" style="color:#4ade80;"></i>Activity Log</h2>
+    <p style="color:#94a3b8;margin-top:.3rem;">All user login, prediction, and system activity events</p>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container-fluid px-4">
+
+    <!-- Filter bar -->
+    <div class="mb-4 d-flex gap-2 flex-wrap align-items-center">
+      <input type="text" id="logSearch" class="form-control" placeholder="&#x1F50D;  Search by user, action or description…"
+             style="max-width:320px;" oninput="filterLog()">
+      <select id="actionFilter" class="form-select" style="max-width:180px;" onchange="filterLog()">
+        <option value="">All Actions</option>
+        <option value="login">Login</option>
+        <option value="logout">Logout</option>
+        <option value="predict">Prediction</option>
+        <option value="train">Training</option>
+        <option value="register">Registration</option>
+        <option value="view_dataset">View Dataset</option>
+      </select>
+      <span style="color:#94a3b8;font-size:.85rem;" id="logCount">{{ logs|length }} records</span>
+    </div>
+
+    {% if logs %}
+    <div class="card-dark" style="border-radius:14px;overflow:hidden;">
+      <div style="overflow-x:auto;">
+        <table class="table table-admin-dark mb-0" id="logtable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>User</th>
+              <th>Action</th>
+              <th>Description</th>
+              <th>Timestamp</th>
+              <th>IP Address</th>
+            </tr>
+          </thead>
+          <tbody id="logBody">
+            {% for log in logs %}
+            <tr data-action="{{ log.action }}" data-text="{{ log.username }} {{ log.action }} {{ log.description }}">
+              <td style="color:#94a3b8;">{{ forloop.counter }}</td>
+              <td style="color:#a78bfa;font-weight:600;">{{ log.username }}</td>
+              <td>
+                {% if log.action == 'login' %}
+                <span class="action-badge" style="background:rgba(22,163,74,.2);color:#4ade80;">
+                  <i class="fa-solid fa-arrow-right-to-bracket me-1"></i>Login
+                </span>
+                {% elif log.action == 'logout' %}
+                <span class="action-badge" style="background:rgba(239,68,68,.15);color:#f87171;">
+                  <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>Logout
+                </span>
+                {% elif log.action == 'predict' %}
+                <span class="action-badge" style="background:rgba(14,165,233,.2);color:#38bdf8;">
+                  <i class="fa-solid fa-brain me-1"></i>Predict
+                </span>
+                {% elif log.action == 'train' %}
+                <span class="action-badge" style="background:rgba(217,119,6,.2);color:#fbbf24;">
+                  <i class="fa-solid fa-microchip me-1"></i>Train
+                </span>
+                {% elif log.action == 'register' %}
+                <span class="action-badge" style="background:rgba(99,102,241,.2);color:#a78bfa;">
+                  <i class="fa-solid fa-user-plus me-1"></i>Register
+                </span>
+                {% elif log.action == 'view_dataset' %}
+                <span class="action-badge" style="background:rgba(148,163,184,.15);color:#94a3b8;">
+                  <i class="fa-solid fa-table me-1"></i>Dataset
+                </span>
+                {% else %}
+                <span class="action-badge" style="background:rgba(148,163,184,.1);color:#64748b;">
+                  {{ log.action }}
+                </span>
+                {% endif %}
+              </td>
+              <td style="color:#94a3b8;font-size:.85rem;">{{ log.description|truncatechars:80 }}</td>
+              <td style="color:#64748b;font-size:.8rem;white-space:nowrap;">{{ log.timestamp|date:"d M Y, H:i:s" }}</td>
+              <td style="color:#64748b;font-size:.8rem;">{{ log.ip_address|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <div class="glass-card p-5 text-center">
+      <i class="fa-solid fa-clipboard-list fa-3x mb-3" style="color:#4b5563;"></i>
+      <h5 style="color:#fff;">No Activity Recorded Yet</h5>
+      <p style="color:#94a3b8;">Activity will be logged here as users interact with the system.</p>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+
+<style>
+.action-badge {
+  border-radius: 6px;
+  padding: .2rem .65rem;
+  font-size: .78rem;
+  font-weight: 500;
+  display: inline-block;
+}
+</style>
+
+<script>
+function filterLog() {
+  const search = document.getElementById('logSearch').value.toLowerCase();
+  const action = document.getElementById('actionFilter').value.toLowerCase();
+  const rows   = document.querySelectorAll('#logBody tr');
+  let visible  = 0;
+  rows.forEach(row => {
+    const text   = (row.dataset.text   || '').toLowerCase();
+    const rowAct = (row.dataset.action || '').toLowerCase();
+    const matchSearch = !search || text.includes(search);
+    const matchAction = !action || rowAct === action;
+    const show = matchSearch && matchAction;
+    row.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('logCount').textContent = visible + ' records';
+}
+</script>
+{% endblock %}

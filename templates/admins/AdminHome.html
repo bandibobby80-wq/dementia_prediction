@@ -1,0 +1,182 @@
+{% extends 'admins/adminbase.html' %}
+{% block title %}Dashboard | DementiaAI Admin{% endblock %}
+
+{% block contents %}
+<!-- Header -->
+<section style="background:linear-gradient(135deg,#1e1b4b,#0f172a);padding:2.5rem 0 2rem;border-bottom:1px solid rgba(167,139,250,.1);">
+  <div class="container">
+    <h2 style="font-weight:800;color:#fff;margin:0;"><i class="fa-solid fa-gauge me-2" style="color:#a78bfa;"></i>Admin Dashboard</h2>
+    <p style="color:#94a3b8;margin-top:.3rem;">Dementia Prediction System — Overview</p>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+
+    <!-- Stats Row -->
+    <div class="row g-4 mb-5">
+      <div class="col-md-3 col-6">
+        <div class="card-dark p-4" style="border-left:3px solid #6366f1;">
+          <div class="d-flex align-items-center gap-3">
+            <div style="width:48px;height:48px;border-radius:12px;background:rgba(99,102,241,.2);display:flex;align-items:center;justify-content:center;">
+              <i class="fa-solid fa-users fa-lg" style="color:#a78bfa;"></i>
+            </div>
+            <div>
+              <div style="font-size:2rem;font-weight:800;color:#fff;line-height:1;">{{ total }}</div>
+              <div style="color:#94a3b8;font-size:.82rem;">Total Users</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card-dark p-4" style="border-left:3px solid #16a34a;">
+          <div class="d-flex align-items-center gap-3">
+            <div style="width:48px;height:48px;border-radius:12px;background:rgba(22,163,74,.2);display:flex;align-items:center;justify-content:center;">
+              <i class="fa-solid fa-user-check fa-lg" style="color:#4ade80;"></i>
+            </div>
+            <div>
+              <div style="font-size:2rem;font-weight:800;color:#fff;line-height:1;">{{ activated }}</div>
+              <div style="color:#94a3b8;font-size:.82rem;">Activated</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card-dark p-4" style="border-left:3px solid #d97706;">
+          <div class="d-flex align-items-center gap-3">
+            <div style="width:48px;height:48px;border-radius:12px;background:rgba(217,119,6,.2);display:flex;align-items:center;justify-content:center;">
+              <i class="fa-solid fa-clock fa-lg" style="color:#fbbf24;"></i>
+            </div>
+            <div>
+              <div style="font-size:2rem;font-weight:800;color:#fff;line-height:1;">{{ pending }}</div>
+              <div style="color:#94a3b8;font-size:.82rem;">Pending</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card-dark p-4" style="border-left:3px solid #0ea5e9;">
+          <div class="d-flex align-items-center gap-3">
+            <div style="width:48px;height:48px;border-radius:12px;background:rgba(14,165,233,.2);display:flex;align-items:center;justify-content:center;">
+              <i class="fa-solid fa-chart-bar fa-lg" style="color:#38bdf8;"></i>
+            </div>
+            <div>
+              <div style="font-size:2rem;font-weight:800;color:#fff;line-height:1;">{{ total_preds }}</div>
+              <div style="color:#94a3b8;font-size:.82rem;">Predictions</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature Cards -->
+    <h5 style="color:#fff;font-weight:700;margin-bottom:1.2rem;"><i class="fa-solid fa-bolt me-2" style="color:#a78bfa;"></i>Quick Access</h5>
+    <div class="row g-4 mb-5">
+      <div class="col-md-3 col-6">
+        <a href="{% url 'RegisterUsersView' %}" class="text-decoration-none">
+          <div class="card-dark p-4 h-100 feature-card" style="cursor:pointer;transition:transform .2s,box-shadow .2s;">
+            <i class="fa-solid fa-users fa-2x mb-3" style="color:#a78bfa;"></i>
+            <h6 style="color:#fff;font-weight:700;">User Management</h6>
+            <p style="color:#94a3b8;font-size:.84rem;margin:0;">View, edit, activate &amp; delete registered users.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3 col-6">
+        <a href="{% url 'ViewPredictions' %}" class="text-decoration-none">
+          <div class="card-dark p-4 h-100 feature-card" style="cursor:pointer;transition:transform .2s,box-shadow .2s;">
+            <i class="fa-solid fa-chart-pie fa-2x mb-3" style="color:#38bdf8;"></i>
+            <h6 style="color:#fff;font-weight:700;">Prediction Results</h6>
+            <p style="color:#94a3b8;font-size:.84rem;margin:0;">Browse all patient predictions with detailed history.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3 col-6">
+        <a href="{% url 'ViewActivityLog' %}" class="text-decoration-none">
+          <div class="card-dark p-4 h-100 feature-card" style="cursor:pointer;transition:transform .2s,box-shadow .2s;">
+            <i class="fa-solid fa-clock-rotate-left fa-2x mb-3" style="color:#4ade80;"></i>
+            <h6 style="color:#fff;font-weight:700;">Activity Log</h6>
+            <p style="color:#94a3b8;font-size:.84rem;margin:0;">Track user logins, predictions, and all actions.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3 col-6">
+        <a href="{% url 'AdminPrediction' %}" class="text-decoration-none">
+          <div class="card-dark p-4 h-100 feature-card" style="cursor:pointer;transition:transform .2s,box-shadow .2s;">
+            <i class="fa-solid fa-brain fa-2x mb-3" style="color:#f472b6;"></i>
+            <h6 style="color:#fff;font-weight:700;">Run Prediction</h6>
+            <p style="color:#94a3b8;font-size:.84rem;margin:0;">Admin dementia risk prediction with confidence score.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card-dark p-4 h-100">
+          <i class="fa-solid fa-microchip fa-2x mb-3" style="color:#fbbf24;"></i>
+          <h6 style="color:#fff;font-weight:700;">ML Models</h6>
+          <p style="color:#94a3b8;font-size:.84rem;margin:0;">Logistic Regression &amp; Random Forest trained by users.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <h5 style="color:#fff;font-weight:700;margin-bottom:1.2rem;"><i class="fa-solid fa-clock-rotate-left me-2" style="color:#4ade80;"></i>Recent Activity</h5>
+    {% if recent_logs %}
+    <div class="card-dark" style="border-radius:14px;overflow:hidden;">
+      <div style="overflow-x:auto;">
+        <table class="table table-admin-dark mb-0">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Action</th>
+              <th>Description</th>
+              <th>Time</th>
+              <th>IP</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in recent_logs %}
+            <tr>
+              <td style="color:#a78bfa;font-weight:600;">{{ log.username }}</td>
+              <td>
+                {% if log.action == 'login' %}
+                  <span style="background:rgba(22,163,74,.2);color:#4ade80;border-radius:6px;padding:.2rem .6rem;font-size:.78rem;"><i class="fa-solid fa-arrow-right-to-bracket me-1"></i>Login</span>
+                {% elif log.action == 'logout' %}
+                  <span style="background:rgba(239,68,68,.15);color:#f87171;border-radius:6px;padding:.2rem .6rem;font-size:.78rem;"><i class="fa-solid fa-arrow-right-from-bracket me-1"></i>Logout</span>
+                {% elif log.action == 'predict' %}
+                  <span style="background:rgba(14,165,233,.2);color:#38bdf8;border-radius:6px;padding:.2rem .6rem;font-size:.78rem;"><i class="fa-solid fa-brain me-1"></i>Predict</span>
+                {% elif log.action == 'train' %}
+                  <span style="background:rgba(217,119,6,.2);color:#fbbf24;border-radius:6px;padding:.2rem .6rem;font-size:.78rem;"><i class="fa-solid fa-microchip me-1"></i>Train</span>
+                {% else %}
+                  <span style="background:rgba(148,163,184,.15);color:#94a3b8;border-radius:6px;padding:.2rem .6rem;font-size:.78rem;">{{ log.action }}</span>
+                {% endif %}
+              </td>
+              <td style="color:#94a3b8;font-size:.85rem;">{{ log.description|truncatechars:60 }}</td>
+              <td style="color:#64748b;font-size:.8rem;white-space:nowrap;">{{ log.timestamp|date:"d M Y, H:i" }}</td>
+              <td style="color:#64748b;font-size:.8rem;">{{ log.ip_address|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="mt-3">
+      <a href="{% url 'ViewActivityLog' %}" class="btn btn-adm">
+        <i class="fa-solid fa-clock-rotate-left me-2"></i>View All {{ total_logs }} Logs
+      </a>
+    </div>
+    {% else %}
+    <div class="card-dark p-4 text-center">
+      <i class="fa-solid fa-inbox fa-2x mb-2" style="color:#4b5563;"></i>
+      <p style="color:#94a3b8;margin:0;">No activity recorded yet.</p>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+
+<style>
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+}
+</style>
+{% endblock %}

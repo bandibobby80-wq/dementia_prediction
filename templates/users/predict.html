@@ -1,0 +1,138 @@
+{% extends 'users/userbase.html' %}
+{% block title %}Predict | DementiaAI{% endblock %}
+
+{% block contents %}
+<section class="py-5">
+  <div class="container">
+    <div class="text-center mb-4">
+      <h3 style="font-weight:800;color:#fff;"><i class="fa-solid fa-brain me-2" style="color:#5eead4;"></i>Dementia Risk
+        Prediction</h3>
+      <p style="color:#94a3b8;max-width:550px;margin:auto;">Enter the patient's clinical measurements below. The AI
+        model will analyse the inputs and predict dementia risk with a confidence score.</p>
+    </div>
+
+    <div class="row justify-content-center">
+      <!-- Form Card -->
+      <div class="col-lg-7">
+        <div class="glass-card p-4 mb-4">
+          <form method="POST">
+            {% csrf_token %}
+            <div class="row g-3">
+              {% for field in form %}
+              <div class="col-sm-6">
+                <label class="form-label" title="{{ field.help_text }}">
+                  <i class="fa-solid fa-circle-info me-1" style="color:#5eead4;font-size:.75rem;"></i>
+                  {{ field.label }}
+                </label>
+                {{ field }}
+                {% if field.errors %}
+                <div class="text-danger" style="font-size:.8rem;">{{ field.errors }}</div>
+                {% endif %}
+              </div>
+              {% endfor %}
+
+              <div class="col-12 d-flex gap-3 mt-2">
+                <button type="submit" class="btn btn-teal py-2 flex-grow-1">
+                  <i class="fa-solid fa-magnifying-glass-chart me-2"></i>Analyse & Predict
+                </button>
+                <button type="button" class="btn py-2 px-4" id="fillSampleData"
+                  style="background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:8px;">
+                  <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Fill Sample Data
+                </button>
+                <a href="{% url 'prediction' %}" class="btn py-2 px-4"
+                  style="background:rgba(239,68,68,.08);color:#f87171;border:1px solid rgba(239,68,68,.2);border-radius:8px;">
+                  <i class="fa-solid fa-rotate-right me-2"></i>Reset
+                </a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Result Card -->
+      {% if prediction %}
+      <div class="col-lg-5">
+        <div class="glass-card p-4 text-center h-100 d-flex flex-column justify-content-center">
+          {% if risk_level == 'high' %}
+          <div
+            style="width:80px;height:80px;border-radius:50%;background:rgba(220,38,38,.2);border:3px solid #dc2626;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+            <i class="fa-solid fa-triangle-exclamation fa-2x" style="color:#f87171;"></i>
+          </div>
+          <h4 style="font-weight:800;color:#f87171;margin-bottom:.5rem;">High Risk Detected</h4>
+          <div class="mb-3">
+            <span class="badge-high">⚠ {{ prediction }}</span>
+          </div>
+          {% else %}
+          <div
+            style="width:80px;height:80px;border-radius:50%;background:rgba(22,163,74,.2);border:3px solid #16a34a;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+            <i class="fa-solid fa-circle-check fa-2x" style="color:#4ade80;"></i>
+          </div>
+          <h4 style="font-weight:800;color:#4ade80;margin-bottom:.5rem;">Low Risk Detected</h4>
+          <div class="mb-3">
+            <span class="badge-low">✓ {{ prediction }}</span>
+          </div>
+          {% endif %}
+
+          {% if confidence %}
+          <p style="color:#94a3b8;font-size:.88rem;margin-top:.5rem;">Model Confidence</p>
+          <div style="font-size:2.5rem;font-weight:800;color:#5eead4;">{{ confidence }}%</div>
+          <!-- Confidence bar -->
+          <div style="background:rgba(255,255,255,.1);border-radius:6px;height:10px;overflow:hidden;margin-top:.8rem;">
+            <div
+              style="width:{{ confidence }}%;height:100%;background:{% if risk_level == 'high' %}linear-gradient(90deg,#dc2626,#f87171){% else %}linear-gradient(90deg,#059669,#34d399){% endif %};border-radius:6px;transition:width 1s;">
+            </div>
+          </div>
+          {% endif %}
+
+          <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:.8rem;margin-top:1.2rem;">
+            <p style="color:#94a3b8;font-size:.8rem;margin:0;">
+              <i class="fa-solid fa-circle-info me-1"></i>
+              This prediction is based on a Random Forest model trained on OASIS dataset data. Consult a medical
+              professional for clinical decisions.
+            </p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Reference Table -->
+    <div class="row justify-content-center mt-4">
+      <div class="col-lg-12">
+        <div
+          style="background:rgba(30,41,59,.6);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:1.2rem;">
+          <h6 style="color:#5eead4;font-weight:600;margin-bottom:.8rem;"><i
+              class="fa-solid fa-book-medical me-1"></i>Clinical Feature Reference</h6>
+          <div class="row g-2" style="font-size:.82rem;color:#94a3b8;">
+            <div class="col-md-4"><b style="color:#e2e8f0;">MMSE</b> — Mini-Mental State Exam (0–30; lower = more
+              impaired)</div>
+            <div class="col-md-4"><b style="color:#e2e8f0;">CDR</b> — Clinical Dementia Rating (0=none, 0.5=mild,
+              1=moderate, 2=severe)</div>
+            <div class="col-md-4"><b style="color:#e2e8f0;">SES</b> — Socioeconomic Status (1=highest, 5=lowest)</div>
+            <div class="col-md-4"><b style="color:#e2e8f0;">eTIV</b> — Estimated Total Intracranial Volume (mm³)</div>
+            <div class="col-md-4"><b style="color:#e2e8f0;">nWBV</b> — Normalised Whole Brain Volume (0–1)</div>
+            <div class="col-md-4"><b style="color:#e2e8f0;">ASF</b> — Atlas Scaling Factor (scaling of brain to atlas)
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.getElementById('fillSampleData').addEventListener('click', function() {
+    document.getElementById('id_M_F').value = 'M';
+    document.getElementById('id_Age').value = '75';
+    document.getElementById('id_EDUC').value = '14';
+    document.getElementById('id_SES').value = '2';
+    document.getElementById('id_MMSE').value = '26';
+    document.getElementById('id_CDR').value = '0.5';
+    document.getElementById('id_eTIV').value = '1450';
+    document.getElementById('id_nWBV').value = '0.740';
+    document.getElementById('id_ASF').value = '1.21';
+    document.getElementById('id_Visit').value = '2';
+    document.getElementById('id_MR_Delay').value = '365';
+  });
+</script>
+{% endblock %}

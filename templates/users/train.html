@@ -1,0 +1,134 @@
+{% extends 'users/userbase.html' %}
+{% block title %}Train Model | DementiaAI{% endblock %}
+
+{% block contents %}
+<section class="py-5">
+  <div class="container">
+    <div class="text-center mb-4">
+      <h3 style="font-weight:800;color:#fff;"><i class="fa-solid fa-gears me-2" style="color:#5eead4;"></i>Train
+        Dementia Prediction Models</h3>
+      <p style="color:#94a3b8;">Upload the OASIS dementia dataset CSV to train both Logistic Regression and Random
+        Forest models.</p>
+    </div>
+
+    <!-- Upload Card -->
+    <div class="row justify-content-center mb-5">
+      <div class="col-md-7">
+        <div class="glass-card p-4">
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label class="form-label"><i class="fa-solid fa-file-csv me-1" style="color:#5eead4;"></i>Select Dataset
+              CSV</label>
+            <input type="file" name="file" class="form-control mb-3" accept=".csv" required>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-teal py-2">
+                <i class="fa-solid fa-play me-2"></i>Start Training
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    {% if trained %}
+    <!-- Model Comparison -->
+    <h5 style="font-weight:700;color:#fff;margin-bottom:1.2rem;"><i class="fa-solid fa-trophy me-2" style="color:#fbbf24;"></i>Results — Best: <span style="color:#5eead4;">{{ best_model }}</span> ({{ best_acc }}%)</h5>
+
+    <div class="row g-4 mb-5">
+      <!-- LR Card -->
+      <div class="col-md-6">
+        <div class="card-dark p-4">
+          <h6 style="color:#60a5fa;font-weight:700;margin-bottom:1rem;"><i
+              class="fa-solid fa-chart-line me-1"></i>Logistic Regression</h6>
+          <div class="row g-2 text-center mb-3">
+            <div class="col-3">
+              <div style="font-size:1.4rem;font-weight:800;color:#5eead4;">{{ lr_acc }}%</div>
+              <div style="color:#94a3b8;font-size:.75rem;">Accuracy</div>
+            </div>
+            <div class="col-3">
+              <div style="font-size:1.4rem;font-weight:800;color:#5eead4;">{{ lr_f1 }}%</div>
+              <div style="color:#94a3b8;font-size:.75rem;">F1 Score</div>
+            </div>
+            <div class="col-3">
+              <div style="font-size:1.4rem;font-weight:800;color:#5eead4;">{{ lr_prec }}%</div>
+              <div style="color:#94a3b8;font-size:.75rem;">Precision</div>
+            </div>
+            <div class="col-3">
+              <div style="font-size:1.4rem;font-weight:800;color:#5eead4;">{{ lr_rec }}%</div>
+              <div style="color:#94a3b8;font-size:.75rem;">Recall</div>
+            </div>
+          </div>
+          <!-- Accuracy Bar -->
+          <div style="background:rgba(255,255,255,.08);border-radius:6px;height:8px;overflow:hidden;">
+            <div
+              style="width:{{ lr_acc }}%;height:100%;background:linear-gradient(90deg,#0d9488,#5eead4);border-radius:6px;transition:width 1s;">
+            </div>
+          </div>
+          <div class="text-center mt-3">
+            <img src="/media/{{ cm_lr }}" class="img-fluid rounded" style="max-height:260px;" alt="LR Confusion Matrix">
+            <p style="color:#94a3b8;font-size:.78rem;margin-top:.4rem;">Confusion Matrix</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RF Card -->
+      <div class="col-md-6">
+        <div class="card-dark p-4" style="border-color:rgba(94,234,212,.3);">
+          <h6 style="color:#34d399;font-weight:700;margin-bottom:1rem;"><i class="fa-solid fa-tree me-1"></i>Random
+            Forest</h6>
+          <div class="row g-2 text-center mb-3">
+            <div class="col-3">
+              <div style="font-size:1.4rem;font-weight:800;color:#5eead4;">{{ rf_acc }}%</div>
+              <div style="color:#94a3b8;font-size:.75rem;">Accuracy</div>
+            </div>
+            <div class="col-3">
+              <div style="font-size:1.4rem;font-weight:800;color:#5eead4;">{{ rf_f1 }}%</div>
+              <div style="color:#94a3b8;font-size:.75rem;">F1 Score</div>
+            </div>
+            <div class="col-3">
+              <div style="font-size:1.4rem;font-weight:800;color:#5eead4;">{{ rf_prec }}%</div>
+              <div style="color:#94a3b8;font-size:.75rem;">Precision</div>
+            </div>
+            <div class="col-3">
+              <div style="font-size:1.4rem;font-weight:800;color:#5eead4;">{{ rf_rec }}%</div>
+              <div style="color:#94a3b8;font-size:.75rem;">Recall</div>
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,.08);border-radius:6px;height:8px;overflow:hidden;">
+            <div
+              style="width:{{ rf_acc }}%;height:100%;background:linear-gradient(90deg,#059669,#34d399);border-radius:6px;">
+            </div>
+          </div>
+          <div class="text-center mt-3">
+            <img src="/media/{{ cm_rf }}" class="img-fluid rounded" style="max-height:260px;" alt="RF Confusion Matrix">
+            <p style="color:#94a3b8;font-size:.78rem;margin-top:.4rem;">Confusion Matrix</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Heatmap + Feature Importance -->
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="card-dark p-4 text-center">
+          <h6 style="color:#fff;font-weight:600;margin-bottom:1rem;">Feature Correlation Heatmap</h6>
+          <img src="/media/{{ heatmap }}" class="img-fluid rounded" alt="Heatmap">
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card-dark p-4 text-center">
+          <h6 style="color:#fff;font-weight:600;margin-bottom:1rem;">Top Feature Importances (RF)</h6>
+          <img src="/media/{{ feat_imp }}" class="img-fluid rounded" alt="Feature Importance">
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-4">
+      <a href="{% url 'prediction' %}" class="btn btn-teal px-5 py-2">
+        <i class="fa-solid fa-arrow-right me-2"></i>Go to Prediction
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,451 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dementia Prediction</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --teal: #0d9488;
+      --teal-light: #5eead4;
+      --dark: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.85);
+      --muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #134e4a 60%, #0f172a 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ── Navbar ── */
+    .main-navbar {
+      position: sticky;
+      top: 0;
+      z-index: 1030;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(94, 234, 212, 0.14);
+      padding: 0.85rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .main-navbar .brand-name {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #5eead4;
+      letter-spacing: -0.4px;
+      white-space: nowrap;
+    }
+
+    .main-navbar .brand-icon-nav {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.45), rgba(99, 102, 241, 0.35));
+      border: 1px solid rgba(94, 234, 212, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .main-navbar .brand-icon-nav i {
+      font-size: 1rem;
+      color: #5eead4;
+    }
+
+    /* center login card in remaining viewport */
+    .page-body {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Decorative blobs */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.25;
+      pointer-events: none;
+    }
+
+    .blob-1 {
+      width: 500px;
+      height: 500px;
+      background: #0d9488;
+      top: -150px;
+      right: -100px;
+      animation: pulse 6s ease-in-out infinite;
+    }
+
+    .blob-2 {
+      width: 350px;
+      height: 350px;
+      background: #6366f1;
+      bottom: -100px;
+      left: -100px;
+      animation: pulse 8s ease-in-out infinite reverse;
+    }
+
+    .blob-3 {
+      width: 200px;
+      height: 200px;
+      background: #5eead4;
+      top: 40%;
+      left: 30%;
+      animation: pulse 5s ease-in-out infinite 2s;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 0.2;
+      }
+
+      50% {
+        transform: scale(1.15);
+        opacity: 0.35;
+      }
+    }
+
+    .login-wrapper {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 440px;
+      padding: 1rem;
+    }
+
+    .glass-card {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(94, 234, 212, 0.18);
+      border-radius: 24px;
+      padding: 2.8rem 2.5rem;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(94, 234, 212, 0.05);
+      animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .brand-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.4), rgba(99, 102, 241, 0.3));
+      border: 1px solid rgba(94, 234, 212, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.2rem;
+      box-shadow: 0 0 30px rgba(13, 148, 136, 0.3);
+    }
+
+    .brand-icon i {
+      font-size: 2rem;
+      color: #5eead4;
+    }
+
+    h4.title {
+      font-weight: 800;
+      color: #fff;
+      font-size: 1.5rem;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin-top: 0.3rem;
+    }
+
+    .form-label {
+      color: #cbd5e1;
+      font-size: 0.83rem;
+      font-weight: 500;
+      margin-bottom: 0.4rem;
+    }
+
+    .form-control {
+      background: rgba(255, 255, 255, 0.06) !important;
+      border: 1px solid rgba(94, 234, 212, 0.2) !important;
+      color: #e2e8f0 !important;
+      border-radius: 10px !important;
+      padding: 0.65rem 1rem !important;
+      font-size: 0.92rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: rgba(94, 234, 212, 0.55) !important;
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.18) !important;
+      background: rgba(255, 255, 255, 0.09) !important;
+    }
+
+    .form-control::placeholder {
+      color: #64748b;
+    }
+
+    .input-icon-wrap {
+      position: relative;
+    }
+
+    .input-icon-wrap i {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #5eead4;
+      font-size: 0.85rem;
+      pointer-events: none;
+    }
+
+    .input-icon-wrap .form-control {
+      padding-left: 2.4rem !important;
+    }
+
+    .btn-signin {
+      width: 100%;
+      padding: 0.75rem;
+      background: linear-gradient(135deg, #0d9488, #0891b2);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.25s;
+      box-shadow: 0 4px 15px rgba(13, 148, 136, 0.35);
+      letter-spacing: 0.3px;
+    }
+
+    .btn-signin:hover {
+      background: linear-gradient(135deg, #0f766e, #0e7490);
+      box-shadow: 0 6px 20px rgba(13, 148, 136, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn-signin:active {
+      transform: translateY(0);
+    }
+
+    .divider {
+      border-color: rgba(255, 255, 255, 0.1);
+      margin: 1.5rem 0;
+    }
+
+    .register-link {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .register-link a {
+      color: #5eead4;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .register-link a:hover {
+      color: #99f6e4;
+    }
+
+    /* Alert messages */
+    .alert-error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .hint-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      color: #a5b4fc;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .show-pass-btn {
+      position: absolute;
+      right: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+
+    .show-pass-btn:hover {
+      color: #5eead4;
+    }
+
+    .pass-wrap .form-control {
+      padding-right: 2.5rem !important;
+    }
+
+    @media (max-width: 480px) {
+      .glass-card {
+        padding: 2rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── Navigation Bar ── -->
+  <nav class="main-navbar">
+    <div class="brand-icon-nav">
+      <i class="fa-solid fa-brain"></i>
+    </div>
+    <span class="brand-name"><i class="fa-solid fa-heartbeat me-2" style="color:#f472b6;font-size:.9rem;"></i>Dementia
+      Prediction</span>
+  </nav>
+
+  <!-- Decorative blobs (fixed, so they're still full-page) -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <!-- Login card centred in remaining space -->
+  <div class="page-body">
+    <div class="login-wrapper">
+      <div class="glass-card">
+        <!-- Brand -->
+        <div class="text-center mb-4">
+          <div class="brand-icon">
+            <i class="fa-solid fa-brain"></i>
+          </div>
+          <h4 class="title"> DEMENTIA LOGIN</h4>
+          <p class="subtitle">Sign in to your account</p>
+        </div>
+
+        <!-- Error messages -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert-error">
+          <i class="fa-solid fa-circle-exclamation"></i> {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Unified Login Form -->
+        <form action="{% url 'UnifiedLoginCheck' %}" method="POST" id="loginForm">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label class="form-label"><i class="fa-regular fa-id-card me-1" style="color:#5eead4;"></i> Login ID</label>
+            <div class="input-icon-wrap">
+              <i class="fa-solid fa-user"></i>
+              <input type="text" class="form-control" name="loginid" id="loginid" placeholder="Enter your login ID"
+                required autocomplete="username">
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label"><i class="fa-solid fa-lock me-1" style="color:#5eead4;"></i> Password</label>
+            <div class="input-icon-wrap pass-wrap" style="position:relative;">
+              <i class="fa-solid fa-key"></i>
+              <input type="password" class="form-control" name="pswd" id="pswd" placeholder="Enter your password"
+                required autocomplete="current-password">
+              <button type="button" class="show-pass-btn" onclick="togglePass()" id="passToggle">
+                <i class="fa-regular fa-eye" id="passIcon"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-signin" id="submitBtn">
+            <i class="fa-solid fa-arrow-right-to-bracket me-2"></i> Sign In
+          </button>
+        </form>
+
+        <hr class="divider">
+
+        <p class="register-link text-center">
+          New user? <a href="{% url 'UserRegister' %}"><i class="fa-solid fa-user-plus me-1"></i>Create an account</a>
+        </p>
+
+        <div class="text-center">
+          <span class="hint-badge">
+            <i class="fa-solid fa-shield-halved"></i>
+
+          </span>
+        </div>
+      </div>
+    </div>
+  </div><!-- /.page-body -->
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function togglePass() {
+      const inp = document.getElementById('pswd');
+      const icon = document.getElementById('passIcon');
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        icon.className = 'fa-regular fa-eye-slash';
+      } else {
+        inp.type = 'password';
+        icon.className = 'fa-regular fa-eye';
+      }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function () {
+      const btn = document.getElementById('submitBtn');
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Signing in…';
+      btn.disabled = true;
+    });
+  </script>
+</body>
+
+</html>

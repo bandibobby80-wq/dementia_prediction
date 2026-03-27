@@ -1,0 +1,107 @@
+{% extends 'admins/adminbase.html' %}
+{% block title %}Prediction Results | DementiaAI Admin{% endblock %}
+
+{% block contents %}
+<section style="background:linear-gradient(135deg,#1e1b4b,#0f172a);padding:2.5rem 0 2rem;border-bottom:1px solid rgba(167,139,250,.1);">
+  <div class="container">
+    <h2 style="font-weight:800;color:#fff;margin:0;"><i class="fa-solid fa-chart-pie me-2" style="color:#38bdf8;"></i>Prediction Results</h2>
+    <p style="color:#94a3b8;margin-top:.3rem;">Complete history of all dementia risk predictions</p>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container-fluid px-4">
+
+    <!-- Summary cards -->
+    <div class="row g-3 mb-4">
+      {% with total=predictions|length %}
+      <div class="col-md-3 col-6">
+        <div class="card-dark p-3" style="border-left:3px solid #38bdf8;">
+          <div style="font-size:1.8rem;font-weight:800;color:#fff;">{{ total }}</div>
+          <div style="color:#94a3b8;font-size:.82rem;">Total Predictions</div>
+        </div>
+      </div>
+      {% endwith %}
+      <div class="col-md-3 col-6">
+        <div class="card-dark p-3" style="border-left:3px solid #f87171;">
+          <div style="font-size:1.8rem;font-weight:800;color:#fff;">
+            {{ predictions|dictsort:"result"|dictsortreversed:"result"|length }}
+          </div>
+          <div style="color:#94a3b8;font-size:.82rem;">Demented Cases</div>
+        </div>
+      </div>
+    </div>
+
+    {% if predictions %}
+    <div class="card-dark" style="border-radius:14px;overflow:hidden;">
+      <div style="overflow-x:auto;">
+        <table class="table table-admin-dark mb-0" id="predtable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>User</th>
+              <th>Date &amp; Time</th>
+              <th>Age</th>
+              <th>Gender</th>
+              <th>MMSE</th>
+              <th>CDR</th>
+              <th>Result</th>
+              <th>Confidence</th>
+              <th>Risk</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in predictions %}
+            <tr>
+              <td style="color:#94a3b8;">{{ forloop.counter }}</td>
+              <td style="font-weight:600;color:#a78bfa;">{{ p.user.loginid }}</td>
+              <td style="color:#64748b;font-size:.82rem;white-space:nowrap;">{{ p.timestamp|date:"d M Y, H:i" }}</td>
+              <td style="color:#e2e8f0;">{{ p.age }}</td>
+              <td style="color:#94a3b8;">{% if p.gender == 'M' %}Male{% else %}Female{% endif %}</td>
+              <td style="color:#94a3b8;">{{ p.mmse }}</td>
+              <td style="color:#94a3b8;">{{ p.cdr }}</td>
+              <td>
+                {% if p.result == 'Demented' %}
+                <span style="background:rgba(239,68,68,.2);color:#fca5a5;border-radius:6px;padding:.25rem .7rem;font-size:.8rem;font-weight:600;">
+                  <i class="fa-solid fa-triangle-exclamation me-1"></i>Demented
+                </span>
+                {% else %}
+                <span style="background:rgba(22,163,74,.2);color:#86efac;border-radius:6px;padding:.25rem .7rem;font-size:.8rem;font-weight:600;">
+                  <i class="fa-solid fa-circle-check me-1"></i>Nondemented
+                </span>
+                {% endif %}
+              </td>
+              <td>
+                {% if p.confidence %}
+                <div style="display:flex;align-items:center;gap:.5rem;">
+                  <div style="background:rgba(255,255,255,.08);border-radius:4px;height:6px;width:60px;overflow:hidden;">
+                    <div style="height:100%;width:{{ p.confidence }}%;background:{% if p.risk_level == 'high' %}#f87171{% else %}#4ade80{% endif %};border-radius:4px;"></div>
+                  </div>
+                  <span style="color:#e2e8f0;font-size:.82rem;">{{ p.confidence }}%</span>
+                </div>
+                {% else %}—{% endif %}
+              </td>
+              <td>
+                {% if p.risk_level == 'high' %}
+                <span style="background:rgba(239,68,68,.15);color:#f87171;border-radius:20px;padding:.2rem .7rem;font-size:.78rem;">High</span>
+                {% else %}
+                <span style="background:rgba(22,163,74,.15);color:#4ade80;border-radius:20px;padding:.2rem .7rem;font-size:.78rem;">Low</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <div class="glass-card p-5 text-center">
+      <i class="fa-solid fa-chart-pie fa-3x mb-3" style="color:#4b5563;"></i>
+      <h5 style="color:#fff;">No Predictions Yet</h5>
+      <p style="color:#94a3b8;">Predictions will appear here once users run the prediction tool.</p>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}

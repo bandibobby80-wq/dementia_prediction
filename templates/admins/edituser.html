@@ -1,0 +1,72 @@
+{% extends 'admins/adminbase.html' %}
+{% block title %}Edit User | DementiaAI Admin{% endblock %}
+
+{% block contents %}
+<section class="py-5">
+  <div class="container" style="max-width:650px;">
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <a href="{% url 'RegisterUsersView' %}" class="btn btn-adm py-2 px-3">
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+      <div>
+        <h3 style="font-weight:800;color:#fff;margin:0;"><i class="fa-solid fa-pen-to-square me-2" style="color:#a78bfa;"></i>Edit User</h3>
+        <p style="color:#94a3b8;margin-top:.2rem;font-size:.88rem;">Editing: <span style="color:#a78bfa;">{{ u.loginid }}</span></p>
+      </div>
+    </div>
+
+    <div class="glass-card p-4">
+      <form method="POST" action="{% url 'EditUser' u.id %}">
+        {% csrf_token %}
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <label class="form-label">Full Name</label>
+            <input type="text" class="form-control" name="name" value="{{ u.name }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Email Address</label>
+            <input type="email" class="form-control" name="email" value="{{ u.email }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Mobile</label>
+            <input type="text" class="form-control" name="mobile" value="{{ u.mobile }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Status</label>
+            <select class="form-select" name="status">
+              <option value="activated" {% if u.status == 'activated' %}selected{% endif %}>Activated</option>
+              <option value="waiting"   {% if u.status != 'activated' %}selected{% endif %}>Pending / Waiting</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Locality</label>
+            <input type="text" class="form-control" name="locality" value="{{ u.locality }}">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Address</label>
+            <textarea class="form-control" name="address" rows="3">{{ u.address }}</textarea>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">City</label>
+            <input type="text" class="form-control" name="city" value="{{ u.city }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">State</label>
+            <input type="text" class="form-control" name="state" value="{{ u.state }}">
+          </div>
+
+          <div class="col-12 mt-2 d-flex gap-3">
+            <button type="submit" class="btn btn-adm px-4 py-2">
+              <i class="fa-solid fa-floppy-disk me-2"></i>Save Changes
+            </button>
+            <a href="{% url 'RegisterUsersView' %}" class="btn py-2 px-4"
+               style="background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:8px;">
+              Cancel
+            </a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

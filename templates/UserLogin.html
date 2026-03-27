@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}User Login | DementiaAI{% endblock %}
+
+{% block contents %}
+<section
+    style="min-height:92vh;background:linear-gradient(135deg,#0f172a 0%,#134e4a 100%);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+    <div
+        style="position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(13,148,136,.2),transparent 70%);top:-80px;right:-80px;">
+    </div>
+    <div
+        style="position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(94,234,212,.1),transparent 70%);bottom:-60px;left:-60px;">
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-9 col-md-6 col-lg-5 col-xl-4">
+                <div class="glass-card p-5">
+                    <div class="text-center mb-4">
+                        <div
+                            style="width:64px;height:64px;border-radius:50%;background:rgba(13,148,136,.25);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                            <i class="fa-solid fa-user-lock" style="font-size:1.6rem;color:#5eead4;"></i>
+                        </div>
+                        <h4 style="font-weight:800;color:#fff;margin:0;">Welcome Back</h4>
+                        <p style="color:#94a3b8;font-size:.88rem;margin-top:.3rem;">Sign in to your account</p>
+                    </div>
+
+                    <form action="{% url 'UserLoginCheck' %}" method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fa-solid fa-id-card me-1"
+                                    style="color:#5eead4;"></i>Login ID</label>
+                            <input type="text" class="form-control" name="loginid" required
+                                placeholder="Enter your login ID" id="loginid">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label"><i class="fa-solid fa-lock me-1"
+                                    style="color:#5eead4;"></i>Password</label>
+                            <input type="password" class="form-control" name="pswd" required
+                                placeholder="Enter password" id="pswd">
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-teal py-2">
+                                <i class="fa-solid fa-arrow-right-to-bracket me-2"></i>Sign In
+                            </button>
+                            <button type="reset" class="btn btn-outline-teal py-2">
+                                <i class="fa-solid fa-rotate-left me-2"></i>Clear
+                            </button>
+                        </div>
+                    </form>
+
+                    <p class="text-center mt-4" style="color:#94a3b8;font-size:.85rem;">
+                        Don't have an account?
+                        <a href="{% url 'UserRegister' %}"
+                            style="color:#5eead4;text-decoration:none;font-weight:600;">Register here</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

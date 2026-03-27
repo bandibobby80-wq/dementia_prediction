@@ -1,0 +1,181 @@
+{% extends 'admins/adminbase.html' %}
+{% block title %}Admin Prediction | DementiaAI{% endblock %}
+
+{% block contents %}
+<section style="background:linear-gradient(135deg,#1e1b4b,#0f172a);padding:2.5rem 0 2rem;border-bottom:1px solid rgba(167,139,250,.1);">
+  <div class="container">
+    <h2 style="font-weight:800;color:#fff;margin:0;"><i class="fa-solid fa-brain me-2" style="color:#f472b6;"></i>Dementia Risk Prediction</h2>
+    <p style="color:#94a3b8;margin-top:.3rem;">Admin tool — run a prediction directly from the dashboard</p>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-5 justify-content-center">
+
+      <!-- Form -->
+      <div class="col-lg-7">
+        <div class="glass-card p-4">
+          <h5 style="color:#fff;font-weight:700;margin-bottom:1.4rem;">
+            <i class="fa-solid fa-sliders me-2" style="color:#a78bfa;"></i>Patient Parameters
+          </h5>
+
+          {% if messages %}
+            {% for message in messages %}
+            <div style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;
+                        border-radius:10px;padding:.75rem 1rem;margin-bottom:1.2rem;font-size:.88rem;">
+              <i class="fa-solid fa-circle-exclamation me-2"></i>{{ message }}
+            </div>
+            {% endfor %}
+          {% endif %}
+
+          <form method="POST" action="{% url 'AdminPrediction' %}">
+            {% csrf_token %}
+            <div class="row g-3">
+
+              <div class="col-md-6">
+                <label class="form-label">{{ form.M_F.label }}</label>
+                {{ form.M_F }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ form.Age.label }}</label>
+                {{ form.Age }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ form.EDUC.label }}</label>
+                {{ form.EDUC }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ form.SES.label }}</label>
+                {{ form.SES }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ form.MMSE.label }}</label>
+                {{ form.MMSE }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ form.CDR.label }}</label>
+                {{ form.CDR }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ form.eTIV.label }}</label>
+                {{ form.eTIV }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ form.nWBV.label }}</label>
+                {{ form.nWBV }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ form.ASF.label }}</label>
+                {{ form.ASF }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ form.Visit.label }}</label>
+                {{ form.Visit }}
+              </div>
+              <div class="col-12">
+                <label class="form-label">{{ form.MR_Delay.label }}</label>
+                {{ form.MR_Delay }}
+              </div>
+
+              <div class="col-12 mt-2 d-flex gap-3">
+                <button type="submit" class="btn btn-adm px-5 py-2">
+                  <i class="fa-solid fa-magnifying-glass-chart me-2"></i>Run Prediction
+                </button>
+                <button type="button" class="btn py-2 px-4" id="fillSampleData"
+                  style="background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:8px;">
+                  <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Fill Sample Data
+                </button>
+                <button type="reset" class="btn py-2 px-4"
+                  style="background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:8px;">
+                  <i class="fa-solid fa-rotate-left me-2"></i>Clear
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Result Panel -->
+      <div class="col-lg-5">
+        {% if prediction %}
+        <div class="glass-card p-4 text-center" style="border-color:{% if risk_level == 'high' %}rgba(239,68,68,.4){% else %}rgba(34,197,94,.4){% endif %};">
+          <div style="width:80px;height:80px;border-radius:50%;
+               background:{% if risk_level == 'high' %}rgba(239,68,68,.2){% else %}rgba(34,197,94,.2){% endif %};
+               display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;">
+            {% if risk_level == 'high' %}
+            <i class="fa-solid fa-triangle-exclamation fa-2x" style="color:#f87171;"></i>
+            {% else %}
+            <i class="fa-solid fa-circle-check fa-2x" style="color:#4ade80;"></i>
+            {% endif %}
+          </div>
+
+          <h3 style="font-weight:800;color:#fff;margin-bottom:.4rem;">{{ prediction }}</h3>
+
+          {% if confidence %}
+          <p style="color:#94a3b8;font-size:.9rem;margin-bottom:1.2rem;">
+            Confidence: <strong style="color:#e2e8f0;">{{ confidence }}%</strong>
+          </p>
+          <div style="background:rgba(255,255,255,.08);border-radius:8px;height:10px;overflow:hidden;margin-bottom:1.2rem;">
+            <div style="height:100%;width:{{ confidence }}%;
+                 background:{% if risk_level == 'high' %}linear-gradient(90deg,#dc2626,#f87171){% else %}linear-gradient(90deg,#16a34a,#4ade80){% endif %};
+                 border-radius:8px;transition:width 1s ease;"></div>
+          </div>
+          {% endif %}
+
+          {% if risk_level == 'high' %}
+          <span style="background:rgba(239,68,68,.2);color:#fca5a5;border-radius:20px;
+                       padding:.4rem 1.2rem;font-size:.9rem;font-weight:600;">
+            <i class="fa-solid fa-circle-radiation me-1"></i>High Risk
+          </span>
+          <p style="color:#94a3b8;font-size:.84rem;margin-top:1rem;">
+            Indicators suggest dementia. Clinical evaluation recommended.
+          </p>
+          {% else %}
+          <span style="background:rgba(34,197,94,.2);color:#86efac;border-radius:20px;
+                       padding:.4rem 1.2rem;font-size:.9rem;font-weight:600;">
+            <i class="fa-solid fa-shield-heart me-1"></i>Low Risk
+          </span>
+          <p style="color:#94a3b8;font-size:.84rem;margin-top:1rem;">
+            No significant dementia indicators detected at this time.
+          </p>
+          {% endif %}
+        </div>
+        {% else %}
+        <div class="glass-card p-4 text-center" style="opacity:.85;">
+          <i class="fa-solid fa-brain fa-3x mb-3" style="color:#4b5563;"></i>
+          <h6 style="color:#fff;">Awaiting Input</h6>
+          <p style="color:#94a3b8;font-size:.88rem;">
+            Fill in the patient parameters and click <strong>Run Prediction</strong> to see the result.
+          </p>
+          <div style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);
+                      border-radius:10px;padding:.75rem;margin-top:1rem;">
+            <p style="color:#a5b4fc;font-size:.8rem;margin:0;">
+              <i class="fa-solid fa-circle-info me-1"></i>
+              The model must be trained by a user before predictions can be made.
+            </p>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+  document.getElementById('fillSampleData').addEventListener('click', function() {
+    document.getElementById('id_M_F').value = 'M';
+    document.getElementById('id_Age').value = '75';
+    document.getElementById('id_EDUC').value = '14';
+    document.getElementById('id_SES').value = '2';
+    document.getElementById('id_MMSE').value = '26';
+    document.getElementById('id_CDR').value = '0.5';
+    document.getElementById('id_eTIV').value = '1450';
+    document.getElementById('id_nWBV').value = '0.740';
+    document.getElementById('id_ASF').value = '1.21';
+    document.getElementById('id_Visit').value = '2';
+    document.getElementById('id_MR_Delay').value = '365';
+  });
+</script>
+{% endblock %}

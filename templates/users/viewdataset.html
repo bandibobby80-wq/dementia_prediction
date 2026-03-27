@@ -1,0 +1,75 @@
+{% extends 'users/userbase.html' %}
+{% block title %}Dataset | DementiaAI{% endblock %}
+
+{% block contents %}
+<section class="py-5">
+    <div class="container-fluid px-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+            <div>
+                <h3 style="font-weight:800;color:#fff;margin:0;"><i class="fa-solid fa-table me-2"
+                        style="color:#5eead4;"></i>OASIS Dementia Dataset</h3>
+                <p style="color:#94a3b8;margin-top:.3rem;">Showing first 100 rows &mdash; <span
+                        style="color:#5eead4;">{{ row_count }} total rows</span>, {{ col_count }} columns</p>
+            </div>
+            <a href="{% url 'Training' %}" class="btn btn-teal px-4">
+                <i class="fa-solid fa-gears me-2"></i>Train on This Data
+            </a>
+        </div>
+
+        {% if data %}
+        <div class="card-dark p-0" style="border-radius:14px;overflow:hidden;">
+            <div style="overflow-x:auto;max-height:70vh;overflow-y:auto;">
+                <style>
+                    .dataset-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: .82rem;
+                    }
+
+                    .dataset-table thead th {
+                        background: rgba(13, 148, 136, .3);
+                        color: #5eead4;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: .4px;
+                        padding: .75rem 1rem;
+                        position: sticky;
+                        top: 0;
+                        white-space: nowrap;
+                        border-bottom: 1px solid rgba(94, 234, 212, .2);
+                    }
+
+                    .dataset-table tbody td {
+                        padding: .6rem 1rem;
+                        border-bottom: 1px solid rgba(255, 255, 255, .05);
+                        color: #e2e8f0;
+                        white-space: nowrap;
+                    }
+
+                    .dataset-table tbody tr:hover td {
+                        background: rgba(94, 234, 212, .04);
+                    }
+                </style>
+                {{ data|safe }}
+            </div>
+        </div>
+        {% else %}
+        <div class="glass-card p-5 text-center">
+            <i class="fa-solid fa-circle-exclamation fa-3x mb-3" style="color:#f87171;"></i>
+            <h5 style="color:#fff;">Dataset Not Found</h5>
+            <p style="color:#94a3b8;">Place <code>dementia_dataset.csv</code> in the <code>media/</code> directory.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Apply dark table class to the generated table
+    document.querySelectorAll('.table').forEach(t => {
+        t.classList.add('dataset-table');
+        t.classList.remove('table', 'table-striped', 'table-hover', 'table-sm');
+    });
+</script>
+{% endblock %}
