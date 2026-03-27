@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path
 from admins import views as admins
 from users  import views as usr
+from users  import api_views
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -34,6 +35,9 @@ urlpatterns = [
     path('ViewPredictions/',    admins.ViewPredictions,   name='ViewPredictions'),
     path('ViewActivityLog/',    admins.ViewActivityLog,   name='ViewActivityLog'),
     path('AdminPrediction/',    admins.AdminPrediction,   name='AdminPrediction'),
+
+    # ── API endpoints ──
+    path('api/predict/',        api_views.predict_api,    name='api_predict'),
 
     # ── User views ──
     path('UserHome/',           usr.UserHome,             name='UserHome'),
