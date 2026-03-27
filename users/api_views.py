@@ -96,13 +96,25 @@ def predict_api(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_api(request):
-    loginid = request.data.get('loginid')
-    password = request.data.get('password')
+    loginid = request.data.get('loginid', '').strip()
+    password = request.data.get('password', '').strip()
     
+    if not loginid or not password:
+        return Response({'error': 'Please provide both login ID and password.'}, status=400)
+
+    # ── Hardcoded Admin Check (Matches UnifiedLoginCheck in admins/views.py) ──
+    if loginid == 'admin' and password == 'admin':
+        return Response({
+            'id': 0,
+            'name': 'System Administrator',
+            'loginid': 'admin',
+            'role': 'admin'
+        })
+
     try:
         user = UserRegistrationModel.objects.get(loginid=loginid, password=password)
         if user.status != 'activated':
-            return Response({'error': 'Account not activated by admin yet.'}, status=403)
+            return Response({'error': 'Your account is pending activation by the admin. Please try again later.'}, status=403)
             
         return Response({
             'id': user.id,
@@ -111,7 +123,7 @@ def login_api(request):
             'role': user.role
         })
     except UserRegistrationModel.DoesNotExist:
-        return Response({'error': 'Invalid Login ID or Password'}, status=401)
+        return Response({'error': 'Invalid Login ID or Password. Please check your credentials.'}, status=401)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
