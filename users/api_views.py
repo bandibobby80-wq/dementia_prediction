@@ -59,9 +59,9 @@ def predict_api(request):
             
         risk_level = 'high' if prediction == 'Demented' else 'low'
         
-        # ── Save to DB if user_id provided ──
+        # ── Save to DB if valid user_id provided ──
         user_id = data.get('user_id')
-        if user_id:
+        if user_id and int(user_id) > 0:
             try:
                 user_obj = UserRegistrationModel.objects.get(id=user_id)
                 PredictionRecord.objects.create(
@@ -156,7 +156,7 @@ def history_api(request, user_id):
         for r in records:
             data.append({
                 'id': r.id,
-                'timestamp': r.timestamp.strftime('%Y-%M-%d %H:%M'),
+                'timestamp': r.timestamp.strftime('%Y-%m-%d %H:%M'),
                 'result': r.result,
                 'confidence': r.confidence,
                 'risk_level': r.risk_level,

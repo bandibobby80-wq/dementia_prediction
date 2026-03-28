@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
   StyleSheet, 
   Text, 
@@ -12,7 +12,8 @@ import {
   Alert,
   FlatList,
   TouchableWithoutFeedback,
-  Keyboard
+  Keyboard,
+  RefreshControl
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
@@ -22,6 +23,8 @@ export default function App() {
   const [screen, setScreen] = useState('Login');
   const [user, setUser] = useState(null);
   const [history, setHistory] = useState([]);
+  const [historyError, setHistoryError] = useState('');
+  const [historyRefreshing, setHistoryRefreshing] = useState(false);
   
   // Auth States
   const [name, setName] = useState('');
@@ -37,19 +40,57 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
 
-  const fetchHistory = async () => {
-    if (!user) return;
-    setLoading(true);
+  const userId = useMemo(() => {
+    if (!user) return null;
+    return user.id ?? user.user_id ?? user.pk ?? user.uid ?? null;
+  }, [user]);
+
+  const normalizeRiskLevel = (value) => {
+    const v = String(value ?? '').toLowerCase();
+    if (v === 'high' || v === 'low' || v === 'medium') return v;
+    return '';
+  };
+
+  const normalizeLoginResponse = (data) => {
+    if (!data) return null;
+    const u = data.user ?? data.account ?? data.profile ?? data;
+    if (u && typeof u === 'object') return u;
+    return null;
+  };
+
+  const parseNumberOrNull = (value) => {
+    const raw = String(value ?? '').trim();
+    if (!raw) return null;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const sanitizeGender = (value) => {
+    const v = String(value ?? '').trim().toUpperCase();
+    return v === 'F' ? 'F' : 'M';
+  };
+
+  const fetchHistory = async ({ refreshing = false } = {}) => {
+    if (!userId) return;
+    setHistoryError('');
+    if (refreshing) setHistoryRefreshing(true);
+    else setLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/history/${user.id}/`);
+      const response = await fetch(`${BASE_URL}/history/${userId}/`);
       const data = await response.json();
       if (response.ok) {
-        setHistory(data.history || []);
+        const items = data.history ?? data.results ?? data.items ?? data ?? [];
+        setHistory(Array.isArray(items) ? items : []);
+      } else {
+        setHistory([]);
+        setHistoryError(data?.error || data?.message || 'Unable to load history.');
       }
     } catch (e) {
-      console.error(e);
+      setHistory([]);
+      setHistoryError('Network error while loading history.');
     } finally {
-      setLoading(false);
+      if (refreshing) setHistoryRefreshing(false);
+      else setLoading(false);
     }
   };
 
@@ -67,7 +108,12 @@ export default function App() {
       });
       const data = await response.json();
       if (response.ok) {
-        setUser(data);
+        const normalized = normalizeLoginResponse(data);
+        if (!normalized) {
+          Alert.alert('Login Failed', 'Unexpected server response.');
+          return;
+        }
+        setUser(normalized);
         setScreen('Dashboard');
       } else {
         Alert.alert('Login Failed', data.error || 'Check your credentials');
@@ -93,7 +139,7 @@ export default function App() {
       });
       const data = await response.json();
       if (response.ok) {
-        Alert.alert('Success', data.message);
+        Alert.alert('Success', data.message || 'Account created. Please login.');
         setScreen('Login');
       } else {
         Alert.alert('Registration Failed', data.error || 'Server error');
@@ -106,10 +152,38 @@ export default function App() {
   };
 
   const handlePredict = async () => {
+    if (!userId) {
+      Alert.alert('Error', 'Please login again.');
+      setScreen('Login');
+      return;
+    }
     const requiredFields = ['Age', 'EDUC', 'SES', 'MMSE', 'CDR', 'eTIV', 'nWBV', 'ASF'];
     for (const field of requiredFields) {
       if (!formData[field]) {
         Alert.alert('Error', `Please enter valid data for ${field}`);
+        return;
+      }
+    }
+
+    const payload = {
+      ...formData,
+      M_F: sanitizeGender(formData.M_F),
+      Age: parseNumberOrNull(formData.Age),
+      EDUC: parseNumberOrNull(formData.EDUC),
+      SES: parseNumberOrNull(formData.SES),
+      MMSE: parseNumberOrNull(formData.MMSE),
+      CDR: parseNumberOrNull(formData.CDR),
+      eTIV: parseNumberOrNull(formData.eTIV),
+      nWBV: parseNumberOrNull(formData.nWBV),
+      ASF: parseNumberOrNull(formData.ASF),
+      Visit: parseNumberOrNull(formData.Visit) ?? 1,
+      MR_Delay: parseNumberOrNull(formData.MR_Delay) ?? 0,
+      user_id: userId,
+    };
+
+    for (const field of requiredFields) {
+      if (payload[field] === null) {
+        Alert.alert('Error', `Please enter valid numeric data for ${field}`);
         return;
       }
     }
@@ -119,7 +193,7 @@ export default function App() {
       const response = await fetch(`${BASE_URL}/predict/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, user_id: user.id }),
+        body: JSON.stringify(payload),
       });
       const data = await response.json();
       if (response.ok) {
@@ -134,6 +208,31 @@ export default function App() {
       setLoading(false);
     }
   };
+
+  const handleLogout = () => {
+    setUser(null);
+    setHistory([]);
+    setResult(null);
+    setHistoryError('');
+    setScreen('Login');
+    setPassword('');
+  };
+
+  const Header = ({ title, onBack, rightLabel, onRight }) => (
+    <View style={styles.topBar}>
+      <TouchableOpacity onPress={onBack} style={styles.topBarBtn}>
+        <Text style={styles.topBarBtnText}>← Back</Text>
+      </TouchableOpacity>
+      <Text style={styles.topBarTitle} numberOfLines={1}>{title}</Text>
+      {rightLabel ? (
+        <TouchableOpacity onPress={onRight} style={styles.topBarBtn}>
+          <Text style={styles.topBarBtnText}>{rightLabel}</Text>
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.topBarBtn} />
+      )}
+    </View>
+  );
 
   return (
     <View style={styles.container}>
@@ -192,7 +291,7 @@ export default function App() {
       {/* ── DASHBOARD SCREEN ── */}
       {screen === 'Dashboard' && user && (
         <View style={styles.centerContainer}>
-          <Text style={styles.title}>Hello, {user.name}!</Text>
+          <Text style={styles.title}>Hello, {user.name || user.username || 'User'}!</Text>
           <Text style={styles.subtitle}>AI-Powered Neuro-Analytic Dashboard</Text>
           <TouchableOpacity style={styles.card} onPress={() => setScreen('Form')}>
             <Text style={styles.cardText}>New Prediction →</Text>
@@ -200,7 +299,10 @@ export default function App() {
           <TouchableOpacity style={[styles.card, {marginTop: 15, borderLeftColor: '#f59e0b'}]} onPress={() => { setScreen('History'); fetchHistory(); }}>
             <Text style={styles.cardText}>Check History →</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.secondaryButton} onPress={() => {setUser(null); setScreen('Login');}}><Text style={styles.secondaryButtonText}>Logout</Text></TouchableOpacity>
+          <TouchableOpacity style={[styles.card, {marginTop: 15, borderLeftColor: '#a78bfa'}]} onPress={() => setScreen('Profile')}>
+            <Text style={styles.cardText}>My Profile →</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.secondaryButton} onPress={handleLogout}><Text style={styles.secondaryButtonText}>Logout</Text></TouchableOpacity>
         </View>
       )}
 
@@ -208,7 +310,7 @@ export default function App() {
       {screen === 'Form' && (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{flex:1}}>
           <ScrollView contentContainerStyle={styles.formContainer}>
-            <Text style={styles.header}>Algorithm Input</Text>
+            <Header title="Algorithm Input" onBack={() => setScreen('Dashboard')} />
             <View style={styles.row}>
               <TextInput style={[styles.input, {flex:1}]} placeholder="Gender (M/F)" value={formData.M_F} placeholderTextColor="#64748b" onChangeText={(v) => setFormData({...formData, M_F: v})} />
               <View style={{width:10}}/><TextInput style={[styles.input, {flex:1}]} placeholder="Age" value={formData.Age} keyboardType="numeric" placeholderTextColor="#64748b" onChangeText={(v) => setFormData({...formData, Age: v})} />
@@ -226,10 +328,10 @@ export default function App() {
       {/* ── RESULT SCREEN ── */}
       {screen === 'Result' && result && (
         <View style={styles.centerContainer}>
-          <Text style={styles.title}>AI Assessment</Text>
-          <View style={[styles.resultCard, result.risk_level === 'high' ? styles.highRisk : styles.lowRisk]}>
-            <Text style={styles.resultValue}>{result.prediction}</Text>
-            <Text style={styles.resultLabel}>Confidence: {result.confidence}%</Text>
+          <Header title="AI Assessment" onBack={() => setScreen('Dashboard')} />
+          <View style={[styles.resultCard, normalizeRiskLevel(result.risk_level) === 'high' ? styles.highRisk : styles.lowRisk]}>
+            <Text style={styles.resultValue}>{String(result.prediction ?? result.result ?? 'Result')}</Text>
+            <Text style={styles.resultLabel}>Confidence: {String(result.confidence ?? result.probability ?? '—')}%</Text>
           </View>
           <TouchableOpacity style={styles.mainButton} onPress={() => setScreen('Dashboard')}><Text style={styles.buttonText}>Close</Text></TouchableOpacity>
         </View>
@@ -238,25 +340,53 @@ export default function App() {
       {/* ── HISTORY SCREEN ── */}
       {screen === 'History' && (
         <View style={{flex:1}}>
-          <Text style={[styles.header, {padding: 25, paddingTop: 60}]}>Diagnosis History</Text>
+          <Header title="Diagnosis History" onBack={() => setScreen('Dashboard')} rightLabel="Refresh" onRight={() => fetchHistory({ refreshing: true })} />
           {loading ? <ActivityIndicator size="large" color="#38bdf8" /> : (
             <FlatList
               data={history}
-              keyExtractor={(item) => item.id.toString()}
-              contentContainerStyle={{padding: 25}}
+              keyExtractor={(item, idx) => String(item?.id ?? item?.pk ?? idx)}
+              contentContainerStyle={{padding: 25, paddingTop: 10}}
+              refreshControl={<RefreshControl refreshing={historyRefreshing} onRefresh={() => fetchHistory({ refreshing: true })} tintColor="#38bdf8" />}
+              ListEmptyComponent={
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyTitle}>{historyError ? 'Could not load history' : 'No history yet'}</Text>
+                  <Text style={styles.emptySub}>{historyError || 'Run your first prediction to see results here.'}</Text>
+                </View>
+              }
               renderItem={({item}) => (
-                <View style={[styles.historyItem, item.risk_level === 'high' ? styles.historyHigh : styles.historyLow]}>
+                <View style={[styles.historyItem, normalizeRiskLevel(item?.risk_level) === 'high' ? styles.historyHigh : styles.historyLow]}>
                   <View>
-                    <Text style={styles.historyDate}>{item.timestamp}</Text>
-                    <Text style={styles.historyResult}>{item.result}</Text>
-                    <Text style={styles.historySub}>Age: {item.age} | MMSE: {item.mmse}</Text>
+                    <Text style={styles.historyDate}>{String(item?.timestamp ?? item?.created_at ?? item?.date ?? '—')}</Text>
+                    <Text style={styles.historyResult}>{String(item?.result ?? item?.prediction ?? '—')}</Text>
+                    <Text style={styles.historySub}>Age: {String(item?.age ?? '—')} | MMSE: {String(item?.mmse ?? '—')}</Text>
                   </View>
-                  <Text style={styles.historyConf}>{item.confidence}%</Text>
+                  <Text style={styles.historyConf}>{String(item?.confidence ?? item?.probability ?? '—')}%</Text>
                 </View>
               )}
             />
           )}
           <TouchableOpacity style={[styles.mainButton, {margin: 25}]} onPress={() => setScreen('Dashboard')}><Text style={styles.buttonText}>Back to Dashboard</Text></TouchableOpacity>
+        </View>
+      )}
+
+      {/* ── PROFILE SCREEN ── */}
+      {screen === 'Profile' && (
+        <View style={{flex:1}}>
+          <Header title="My Profile" onBack={() => setScreen('Dashboard')} />
+          <View style={{padding: 25}}>
+            <View style={styles.profileCard}>
+              <Text style={styles.profileName}>{user?.name || user?.username || 'User'}</Text>
+              <Text style={styles.profileField}>Login ID: {String(user?.loginid ?? user?.login_id ?? user?.id ?? '—')}</Text>
+              <Text style={styles.profileField}>Email: {String(user?.email ?? '—')}</Text>
+              <Text style={styles.profileField}>Mobile: {String(user?.mobile ?? user?.phone ?? '—')}</Text>
+            </View>
+            <TouchableOpacity style={[styles.mainButton, {marginTop: 15}]} onPress={() => { setScreen('History'); fetchHistory(); }}>
+              <Text style={styles.buttonText}>View My History</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.secondaryButton} onPress={handleLogout}>
+              <Text style={styles.secondaryButtonText}>Logout</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
     </View>
@@ -291,5 +421,18 @@ const styles = StyleSheet.create({
   historyDate: { color: '#64748b', fontSize: 12 },
   historyResult: { color: '#f8fafc', fontSize: 18, fontWeight: 'bold', marginTop: 2 },
   historySub: { color: '#94a3b8', fontSize: 12, marginTop: 4 },
-  historyConf: { color: '#38bdf8', fontSize: 20, fontWeight: 'bold' }
+  historyConf: { color: '#38bdf8', fontSize: 20, fontWeight: 'bold' },
+
+  topBar: { paddingTop: 60, paddingHorizontal: 16, paddingBottom: 12, flexDirection: 'row', alignItems: 'center' },
+  topBarBtn: { width: 90, paddingVertical: 8 },
+  topBarBtnText: { color: '#38bdf8', fontSize: 16 },
+  topBarTitle: { flex: 1, color: '#f8fafc', fontSize: 18, fontWeight: 'bold', textAlign: 'center' },
+
+  emptyState: { paddingTop: 30, paddingHorizontal: 10 },
+  emptyTitle: { color: '#f8fafc', fontSize: 18, fontWeight: 'bold', marginBottom: 8, textAlign: 'center' },
+  emptySub: { color: '#94a3b8', fontSize: 14, textAlign: 'center' },
+
+  profileCard: { backgroundColor: '#1e293b', borderRadius: 18, padding: 20, borderWidth: 1, borderColor: '#334155' },
+  profileName: { color: '#f8fafc', fontSize: 22, fontWeight: 'bold', marginBottom: 12 },
+  profileField: { color: '#94a3b8', fontSize: 14, marginBottom: 6 }
 });
