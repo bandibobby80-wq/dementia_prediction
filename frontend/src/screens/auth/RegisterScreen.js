@@ -59,13 +59,7 @@ const RegisterScreen = ({ navigation }) => {
     }
   };
 
-  const Field = ({ label, fkey, icon, ...props }) => (
-    <StyledInput
-      label={label} value={form[fkey]}
-      onChangeText={set(fkey)} leftIcon={icon}
-      error={errors[fkey]} {...props}
-    />
-  );
+
 
   return (
     <GradientBackground>
@@ -92,20 +86,17 @@ const RegisterScreen = ({ navigation }) => {
           <View style={styles.card}>
             {/* Personal Info */}
             <SectionLabel label="Personal Information" icon="person-circle-outline" />
-            <Field label="Full Name"  fkey="name"    icon="person-outline"   placeholder="e.g. John Smith" />
-            <Field label="Login ID"   fkey="loginid" icon="at-outline"        placeholder="Choose a unique ID" />
-            <Field label="Password"   fkey="password" icon="lock-closed-outline"
-              placeholder="Min 8 chars, upper+lower+number" secureTextEntry />
-            <Field label="Mobile"     fkey="mobile"  icon="call-outline"
-              placeholder="10-digit number" keyboardType="phone-pad" />
-            <Field label="Email"      fkey="email"   icon="mail-outline"
-              placeholder="your@email.com" keyboardType="email-address" />
+            <StyledInput label="Full Name" value={form.name} onChangeText={set('name')} error={errors.name} leftIcon="person-outline" placeholder="e.g. John Smith" />
+            <StyledInput label="Login ID" value={form.loginid} onChangeText={set('loginid')} error={errors.loginid} leftIcon="at-outline" placeholder="Choose a unique ID" />
+            <StyledInput label="Password" value={form.password} onChangeText={set('password')} error={errors.password} leftIcon="lock-closed-outline" placeholder="Min 8 chars, upper+lower+number" secureTextEntry />
+            <StyledInput label="Mobile" value={form.mobile} onChangeText={set('mobile')} error={errors.mobile} leftIcon="call-outline" placeholder="10-digit number" keyboardType="phone-pad" />
+            <StyledInput label="Email" value={form.email} onChangeText={set('email')} error={errors.email} leftIcon="mail-outline" placeholder="your@email.com" keyboardType="email-address" />
 
             {/* Address */}
             <SectionLabel label="Address Details" icon="location-outline" />
-            <Field label="Locality / Area" fkey="locality" icon="map-outline"    placeholder="e.g. Sector 12" />
-            <Field label="City"            fkey="city"     icon="business-outline" placeholder="e.g. Mumbai" />
-            <Field label="State"           fkey="state"    icon="flag-outline"   placeholder="e.g. Maharashtra" />
+            <StyledInput label="Locality / Area" value={form.locality} onChangeText={set('locality')} error={errors.locality} leftIcon="map-outline" placeholder="e.g. Sector 12" />
+            <StyledInput label="City" value={form.city} onChangeText={set('city')} error={errors.city} leftIcon="business-outline" placeholder="e.g. Mumbai" />
+            <StyledInput label="State" value={form.state} onChangeText={set('state')} error={errors.state} leftIcon="flag-outline" placeholder="e.g. Maharashtra" />
             <StyledInput
               label="Full Address" value={form.address}
               onChangeText={set('address')} leftIcon="home-outline"

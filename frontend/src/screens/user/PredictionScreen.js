@@ -128,15 +128,6 @@ const PredictionScreen = () => {
     setResult(null);
   };
 
-  const NumInput = ({ label, fkey, placeholder, step, ...props }) => (
-    <StyledInput
-      label={label} value={form[fkey]}
-      onChangeText={set(fkey)} keyboardType="numeric"
-      placeholder={placeholder} error={errors[fkey]}
-      style={styles.halfInput} {...props}
-    />
-  );
-
   return (
     <GradientBackground>
       <KeyboardAvoidingView
@@ -170,32 +161,32 @@ const PredictionScreen = () => {
               <Ionicons name="body-outline" size={13} color={COLORS.teal} />  Demographics
             </Text>
             <View style={styles.row}>
-              <NumInput label="Age (years)"  fkey="Age"  placeholder="e.g. 72" />
-              <NumInput label="Education (yrs)" fkey="EDUC" placeholder="e.g. 14" />
+              <StyledInput style={styles.halfInput} label="Age (years)"  value={form.Age}  onChangeText={set('Age')}  error={errors.Age}  placeholder="e.g. 72" keyboardType="numeric" />
+              <StyledInput style={styles.halfInput} label="Education (yrs)" value={form.EDUC} onChangeText={set('EDUC')} error={errors.EDUC} placeholder="e.g. 14" keyboardType="numeric" />
             </View>
             <View style={styles.row}>
-              <NumInput label="SES (1–5)"    fkey="SES"  placeholder="1=high" />
-              <NumInput label="Visit No."    fkey="Visit" placeholder="e.g. 2" />
+              <StyledInput style={styles.halfInput} label="SES (1–5)"    value={form.SES}  onChangeText={set('SES')}  error={errors.SES}  placeholder="1=high" keyboardType="numeric" />
+              <StyledInput style={styles.halfInput} label="Visit No."    value={form.Visit} onChangeText={set('Visit')} error={errors.Visit} placeholder="e.g. 2" keyboardType="numeric" />
             </View>
 
             <Text style={styles.groupLabel}>
               <Ionicons name="fitness-outline" size={13} color={COLORS.teal} />  Clinical Scores
             </Text>
             <View style={styles.row}>
-              <NumInput label="MMSE (0–30)"  fkey="MMSE" placeholder="0–30" />
-              <NumInput label="CDR"          fkey="CDR"  placeholder="0 / 0.5 / 1 / 2" />
+              <StyledInput style={styles.halfInput} label="MMSE (0–30)"  value={form.MMSE} onChangeText={set('MMSE')} error={errors.MMSE} placeholder="0–30" keyboardType="numeric" />
+              <StyledInput style={styles.halfInput} label="CDR"          value={form.CDR}  onChangeText={set('CDR')}  error={errors.CDR}  placeholder="0 / 0.5 / 1 / 2" keyboardType="numeric" />
             </View>
 
             <Text style={styles.groupLabel}>
               <Ionicons name="scan-outline" size={13} color={COLORS.teal} />  MRI Measurements
             </Text>
             <View style={styles.row}>
-              <NumInput label="eTIV (mm³)"   fkey="eTIV"  placeholder="e.g. 1450" />
-              <NumInput label="nWBV"         fkey="nWBV"  placeholder="e.g. 0.74" />
+              <StyledInput style={styles.halfInput} label="eTIV (mm³)"   value={form.eTIV}  onChangeText={set('eTIV')} error={errors.eTIV}  placeholder="e.g. 1450" keyboardType="numeric" />
+              <StyledInput style={styles.halfInput} label="nWBV"         value={form.nWBV}  onChangeText={set('nWBV')} error={errors.nWBV}  placeholder="e.g. 0.74" keyboardType="numeric" />
             </View>
             <View style={styles.row}>
-              <NumInput label="ASF"          fkey="ASF"      placeholder="e.g. 1.21" />
-              <NumInput label="MR Delay (days)" fkey="MR_Delay" placeholder="e.g. 365" />
+              <StyledInput style={styles.halfInput} label="ASF"          value={form.ASF}      onChangeText={set('ASF')}      error={errors.ASF}      placeholder="e.g. 1.21" keyboardType="numeric" />
+              <StyledInput style={styles.halfInput} label="MR Delay (days)" value={form.MR_Delay} onChangeText={set('MR_Delay')} error={errors.MR_Delay} placeholder="e.g. 365" keyboardType="numeric" />
             </View>
 
             {/* Buttons */}
