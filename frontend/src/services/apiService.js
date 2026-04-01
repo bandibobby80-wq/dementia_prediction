@@ -10,7 +10,7 @@ import { BASE_URL, ENDPOINTS } from '../config/api';
 // ── Axios instance ────────────────────────────────────────
 const client = axios.create({
   baseURL: BASE_URL,
-  timeout: 15000,
+  timeout: 60000,
   headers: {
     'Content-Type': 'application/json',
     'Bypass-Tunnel-Reminder': 'true', // Bypasses the localtunnel warning screen magically

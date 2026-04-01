@@ -43,6 +43,7 @@ urlpatterns = [
     path('prediction/',         usr.Prediction,           name='prediction'),
 
     # ── Mobile REST API ──────────────────────────────────────────────────────
+    path('api/ping/',           api.api_ping,             name='api_ping'),
     # Auth
     path('api/login/',          api.api_login,            name='api_login'),
     path('api/register/',       api.api_register,         name='api_register'),

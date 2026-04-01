@@ -30,6 +30,11 @@
       "expo-secure-store",
       "expo-font"
     ],
-    "newArchEnabled": true
+    "newArchEnabled": true,
+    "extra": {
+      "eas": {
+        "projectId": "9dd37ebb-7550-468e-bd66-b2e64f39bf46"
+      }
+    }
   }
 }

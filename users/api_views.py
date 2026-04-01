@@ -56,6 +56,9 @@ def _require_auth(request):
     return user, None
 
 
+def api_ping(request):
+    return JsonResponse({"success": True, "ping": "pong from v2.0"})
+
 # ─────────────────────────────────────────────────────────────────────────────
 # AUTH ENDPOINTS
 # ─────────────────────────────────────────────────────────────────────────────
