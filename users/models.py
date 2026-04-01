@@ -85,3 +85,20 @@ class ActivityLog(models.Model):
     class Meta:
         db_table = 'ActivityLogs'
         ordering = ['-timestamp']
+
+
+class MobileAuthToken(models.Model):
+    """Simple token model for React Native mobile app authentication."""
+    user = models.OneToOneField(
+        UserRegistrationModel,
+        on_delete=models.CASCADE,
+        related_name='mobile_token'
+    )
+    key = models.CharField(max_length=64, unique=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Token for {self.user.loginid}"
+
+    class Meta:
+        db_table = 'MobileAuthTokens'
