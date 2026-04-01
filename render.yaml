@@ -1,0 +1,16 @@
+version: "1"
+services:
+  - type: web
+    name: personalised-dementia-prediction
+    env: python
+    repo: https://github.com/bandibobby80-wq/dementia_prediction.git
+    branch: main
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate"
+    startCommand: "gunicorn personalised_dementia_prediction.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "*"
