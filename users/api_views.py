@@ -257,12 +257,6 @@ def api_predict(request):
     user, err = _require_auth(request)
     if err:
         return err
-    # The admin static token cannot own DB prediction records
-    if user == "__admin__":
-        return JsonResponse(
-            {"success": False, "message": "Admin accounts should use the web dashboard for predictions."},
-            status=403,
-        )
 
     data = _json_body(request)
 
@@ -320,29 +314,35 @@ def api_predict(request):
 
         risk_level = "high" if prediction == "Demented" else "low"
 
-        # Save record
-        PredictionRecord.objects.create(
-            user=user,
-            age=float(data["Age"]),
-            gender=gender,
-            educ=float(data["EDUC"]),
-            ses=float(data["SES"]),
-            mmse=float(data["MMSE"]),
-            cdr=float(data["CDR"]),
-            etiv=float(data["eTIV"]),
-            nwbv=float(data["nWBV"]),
-            asf=float(data["ASF"]),
-            visit=int(data["Visit"]),
-            mr_delay=int(data["MR_Delay"]),
-            result=prediction,
-            confidence=confidence,
-            risk_level=risk_level,
-        )
+        is_admin = (user == "__admin__")
+
+        # Save record for real users only
+        if not is_admin:
+            PredictionRecord.objects.create(
+                user=user,
+                age=float(data["Age"]),
+                gender=gender,
+                educ=float(data["EDUC"]),
+                ses=float(data["SES"]),
+                mmse=float(data["MMSE"]),
+                cdr=float(data["CDR"]),
+                etiv=float(data["eTIV"]),
+                nwbv=float(data["nWBV"]),
+                asf=float(data["ASF"]),
+                visit=int(data["Visit"]),
+                mr_delay=int(data["MR_Delay"]),
+                result=prediction,
+                confidence=confidence,
+                risk_level=risk_level,
+            )
 
         ip = request.META.get("REMOTE_ADDR")
+        log_user = None if is_admin else user
+        log_username = "admin" if is_admin else user.loginid
+
         ActivityLog.objects.create(
-            user=user,
-            username=user.loginid,
+            user=log_user,
+            username=log_username,
             action="predict",
             description=f"Prediction: {prediction} (confidence={confidence}%, risk={risk_level}).",
             ip_address=ip,
