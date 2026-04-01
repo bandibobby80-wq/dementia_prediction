@@ -3,6 +3,7 @@ from django.urls import path
 from admins import views as admins
 from users  import views as usr
 from users  import api_views as api
+from users  import debug_api as debug
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -42,6 +43,7 @@ urlpatterns = [
     path('Training',            usr.Training,             name='Training'),
     path('prediction/',         usr.Prediction,           name='prediction'),
 
+    path('debug/ping/',         debug.debug_ping,         name='debug_ping'),
     # ── Mobile REST API ──────────────────────────────────────────────────────
     path('api/ping/',           api.api_ping,             name='api_ping'),
     # Auth
