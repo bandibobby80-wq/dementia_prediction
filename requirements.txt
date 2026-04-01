@@ -15,7 +15,7 @@ typing_extensions==4.15.0
 python-dotenv==1.2.2
 pillow==12.1.1
 reportlab==4.4.10
-pycairo==1.29.0
+# pycairo removed for Render compatibility
 PyMuPDF==1.27.1
 pypdf==6.7.1
 Markdown==3.10.2
