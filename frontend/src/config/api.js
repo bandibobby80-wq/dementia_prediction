@@ -23,8 +23,9 @@ export const ENDPOINTS = {
   ADMIN_USERS:        `${BASE_URL}/api/admin/users/`,
   ADMIN_PREDICTIONS:  `${BASE_URL}/api/admin/predictions/`,
   ADMIN_LOGS:         `${BASE_URL}/api/admin/activity-logs/`,
-  adminActivate: (uid) => `${BASE_URL}/api/admin/users/${uid}/activate/`,
-  adminDelete:   (uid) => `${BASE_URL}/api/admin/users/${uid}/`,
+  adminActivate:   (uid) => `${BASE_URL}/api/admin/users/${uid}/activate/`,
+  adminChangeRole: (uid) => `${BASE_URL}/api/admin/users/${uid}/role/`,
+  adminDelete:     (uid) => `${BASE_URL}/api/admin/users/${uid}/`,
 };
 
 export default BASE_URL;

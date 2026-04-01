@@ -9,7 +9,7 @@ from users.forms import UserRegistrationForm
 # ─────────────────────────────────────────────
 
 def Login(request):
-    """Root landing page — unified login."""
+    """Unified login page."""
     return render(request, 'Login.html')
 
 
@@ -281,4 +281,10 @@ def UserRegister(request):
 
 
 def index(request):
-    return redirect('Login')
+    """Landing page — shown at the root URL."""
+    # If already logged in, redirect to the appropriate dashboard
+    if request.session.get('admin'):
+        return redirect('AdminHome')
+    if request.session.get('loggeduser'):
+        return redirect('UserHome')
+    return render(request, 'index.html')

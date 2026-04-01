@@ -11,6 +11,7 @@ import AdminDashboardScreen   from '../screens/admin/AdminDashboardScreen';
 import AdminUsersScreen       from '../screens/admin/AdminUsersScreen';
 import AdminPredictionsScreen from '../screens/admin/AdminPredictionsScreen';
 import AdminLogsScreen        from '../screens/admin/AdminLogsScreen';
+import PredictionScreen       from '../screens/user/PredictionScreen';
 import ProfileScreen          from '../screens/user/ProfileScreen';
 import { COLORS, FONTS } from '../theme/colors';
 
@@ -35,11 +36,12 @@ const AdminNavigator = () => (
       tabBarLabelStyle: { fontSize: FONTS.size.xs, fontWeight: FONTS.weight.medium },
       tabBarIcon: ({ focused, color }) => {
         const icons = {
-          Overview:    focused ? 'grid'                 : 'grid-outline',
-          Users:       focused ? 'people'               : 'people-outline',
-          Predictions: focused ? 'analytics'            : 'analytics-outline',
-          'Audit Log': focused ? 'document-text'        : 'document-text-outline',
-          Account:     focused ? 'person-circle'        : 'person-circle-outline',
+          Overview:    focused ? 'grid'          : 'grid-outline',
+          Users:       focused ? 'people'        : 'people-outline',
+          Predict:     focused ? 'pulse'         : 'pulse-outline',
+          Predictions: focused ? 'analytics'     : 'analytics-outline',
+          'Audit Log': focused ? 'document-text' : 'document-text-outline',
+          Account:     focused ? 'person-circle' : 'person-circle-outline',
         };
         const name = icons[route.name] ?? 'ellipse-outline';
         return (
@@ -58,6 +60,7 @@ const AdminNavigator = () => (
   >
     <Tab.Screen name="Overview"    component={AdminDashboardScreen} />
     <Tab.Screen name="Users"       component={AdminUsersScreen} />
+    <Tab.Screen name="Predict"     component={PredictionScreen}       options={{ title: 'Predict' }} />
     <Tab.Screen name="Predictions" component={AdminPredictionsScreen} />
     <Tab.Screen name="Audit Log"   component={AdminLogsScreen} />
     <Tab.Screen name="Account"     component={ProfileScreen} />

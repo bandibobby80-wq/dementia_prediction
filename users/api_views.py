@@ -38,6 +38,9 @@ def _get_user_from_token(request):
     if not auth_header.startswith("Bearer "):
         return None
     token_key = auth_header.split(" ", 1)[1].strip()
+    # Admin static token check — return a synthetic sentinel
+    if token_key == "admin-static-token":
+        return "__admin__"
     try:
         token = MobileAuthToken.objects.select_related("user").get(key=token_key)
         return token.user
@@ -46,7 +49,12 @@ def _get_user_from_token(request):
 
 
 def _require_auth(request):
-    """Return (user, None) on success or (None, JsonResponse) on failure."""
+    """Return (user, None) on success or (None, JsonResponse) on failure.
+    
+    For the admin static token, returns the string '__admin__' as a sentinel.
+    Callers that need a real DB user (e.g. predict, history) must handle
+    this sentinel and decide whether to allow or reject admin access.
+    """
     user = _get_user_from_token(request)
     if user is None:
         return None, JsonResponse(
@@ -249,6 +257,12 @@ def api_predict(request):
     user, err = _require_auth(request)
     if err:
         return err
+    # The admin static token cannot own DB prediction records
+    if user == "__admin__":
+        return JsonResponse(
+            {"success": False, "message": "Admin accounts should use the web dashboard for predictions."},
+            status=403,
+        )
 
     data = _json_body(request)
 
@@ -360,6 +374,11 @@ def api_history(request):
     user, err = _require_auth(request)
     if err:
         return err
+    if user == "__admin__":
+        return JsonResponse(
+            {"success": False, "message": "Admin accounts do not have personal prediction history."},
+            status=403,
+        )
 
     records = PredictionRecord.objects.filter(user=user).order_by("-timestamp")[:50]
     history = []
@@ -400,6 +419,11 @@ def api_dashboard(request):
     user, err = _require_auth(request)
     if err:
         return err
+    if user == "__admin__":
+        return JsonResponse(
+            {"success": False, "message": "Use the admin dashboard endpoint for admin statistics."},
+            status=403,
+        )
 
     total_preds = PredictionRecord.objects.filter(user=user).count()
     high_risk = PredictionRecord.objects.filter(user=user, risk_level="high").count()
@@ -528,6 +552,28 @@ def api_admin_activate_user(request, uid):
         user.status = "activated"
         user.save()
         return JsonResponse({"success": True, "message": f"User '{user.name}' activated."})
+    except UserRegistrationModel.DoesNotExist:
+        return JsonResponse({"success": False, "message": "User not found."}, status=404)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_admin_change_role(request, uid):
+    """POST /api/admin/users/<uid>/role/ — toggle role between 'user' and 'admin'."""
+    _, err = _require_admin(request)
+    if err:
+        return err
+
+    try:
+        user = UserRegistrationModel.objects.get(id=uid)
+        if user.role == "admin":
+            user.role = "user"
+            msg = f"User '{user.name}' demoted to User."
+        else:
+            user.role = "admin"
+            msg = f"User '{user.name}' promoted to Admin."
+        user.save()
+        return JsonResponse({"success": True, "message": msg, "new_role": user.role})
     except UserRegistrationModel.DoesNotExist:
         return JsonResponse({"success": False, "message": "User not found."}, status=404)
 

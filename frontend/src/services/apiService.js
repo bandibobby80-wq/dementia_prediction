@@ -100,6 +100,11 @@ export const activateUser = async (uid) => {
   return data;
 };
 
+export const changeUserRole = async (uid) => {
+  const { data } = await client.post(ENDPOINTS.adminChangeRole(uid));
+  return data;
+};
+
 export const deleteUser = async (uid) => {
   const { data } = await client.delete(ENDPOINTS.adminDelete(uid));
   return data;

@@ -11,7 +11,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # ── Root / Authentication ──
-    path('',                    admins.Login,             name='Login'),
+    path('',                    admins.index,             name='index'),
+    path('login/',               admins.Login,             name='Login'),
     path('LoginCheck/',         admins.UnifiedLoginCheck, name='UnifiedLoginCheck'),
     path('AdminLogout/',        admins.AdminLogout,       name='AdminLogout'),
     path('UserLogout/',         usr.UserLogout,           name='UserLogout'),
@@ -62,6 +63,7 @@ urlpatterns = [
     path('api/admin/dashboard/',                    api.api_admin_dashboard,      name='api_admin_dashboard'),
     path('api/admin/users/',                        api.api_admin_users,          name='api_admin_users'),
     path('api/admin/users/<int:uid>/activate/',     api.api_admin_activate_user,  name='api_admin_activate_user'),
+    path('api/admin/users/<int:uid>/role/',         api.api_admin_change_role,    name='api_admin_change_role'),
     path('api/admin/users/<int:uid>/',              api.api_admin_delete_user,    name='api_admin_delete_user'),
     path('api/admin/predictions/',                  api.api_admin_predictions,    name='api_admin_predictions'),
     path('api/admin/activity-logs/',                api.api_admin_activity_logs,  name='api_admin_activity_logs'),
