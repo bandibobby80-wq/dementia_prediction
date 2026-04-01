@@ -3,7 +3,7 @@
 // Centralised API configuration
 // ─────────────────────────────────────────────────────────
 
-export const BASE_URL = 'https://personalized-dementia-prediction.onrender.com';
+export const BASE_URL = 'https://dementia-prediction.onrender.com';
 // export const BASE_URL = 'https://chatty-kings-love.loca.lt'; // local testing bypass
 
 export const ENDPOINTS = {
