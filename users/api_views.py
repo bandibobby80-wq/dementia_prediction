@@ -118,6 +118,7 @@ def api_login(request):
 
     return JsonResponse({
         "success": True,
+        "DEBUG_VER": "v2.0",
         "token": token.key,
         "user": {
             "id": user.id,
