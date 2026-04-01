@@ -8,7 +8,7 @@ export const BASE_URL = 'https://personalized-dementia-prediction.onrender.com';
 
 export const ENDPOINTS = {
   // Auth
-  LOGIN:    `${BASE_URL}/api/login/`,
+  LOGIN:    `${BASE_URL}/mobile/api/login/`,
   REGISTER: `${BASE_URL}/api/register/`,
   LOGOUT:   `${BASE_URL}/api/logout/`,
   PROFILE:  `${BASE_URL}/api/profile/`,
